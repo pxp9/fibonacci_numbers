@@ -11,14 +11,47 @@ defmodule FibRustElixir do
   def slow_fib(1), do: 1
 
   def slow_fib(n) do
-    slow_fib(n) + slow_fib(n - 1)
+    slow_fib(n - 1) + slow_fib(n - 2)
   end
 
   def slow_golden_ratio(n) do
-    b = slow_fib(n)
-    a = slow_fib(n - 1)
+    b = slow_fib(n - 1)
+    a = slow_fib(n - 2)
 
     b / a
+  end
+
+  def dp_slow_fib(n) do
+    if :ets.whereis(:fibs) == :undefined do
+      :ets.new(:fibs, [:named_table, read_concurrency: true])
+    end
+
+    do_dp_slow_fib(n)
+  end
+
+  defp do_dp_slow_fib(0) do
+    :ets.insert(:fibs, {0, 0})
+
+    0
+  end
+
+  defp do_dp_slow_fib(1) do
+    :ets.insert(:fibs, {1, 1})
+
+    1
+  end
+
+  defp do_dp_slow_fib(n) do
+    result = :ets.lookup(:fibs, n)
+
+    if result == [] do
+      val = do_dp_slow_fib(n - 1) + do_dp_slow_fib(n - 2)
+      :ets.insert(:fibs, {n, val})
+      val
+    else
+      [{_n, val}] = result
+      val
+    end
   end
 
   def fast_inverse_square_root(number) do
@@ -77,7 +110,9 @@ defmodule FibRustElixir do
         "75" => 75,
         "100" => 100
       },
-      after_each: fn result -> result in [1, 2111485077978050, 354224848179261915075] end,
+      after_each: fn result ->
+        result in [1, 2_111_485_077_978_050, 354_224_848_179_261_915_075]
+      end,
       parallel: 2
     )
   end
