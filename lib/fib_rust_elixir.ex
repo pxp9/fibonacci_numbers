@@ -54,7 +54,7 @@ defmodule FibRustElixir do
     end
   end
 
-  def fast_inverse_square_root(number) do
+  defp fast_inverse_square_root(number) do
     x2 = number * 0.5
     <<i::integer-size(64)>> = <<number::float-size(64)>>
     <<y::float-size(64)>> = <<0x5FE6EB50C7B537A9 - (i >>> 1)::integer-size(64)>>
@@ -90,10 +90,14 @@ defmodule FibRustElixir do
       },
       inputs: %{
         "200_000" => 200_000,
-        "1 Million" => 1_000_000
+        "500_000" => 500_000,
+        "1 Million" => 1_000_000,
+        "2 Million" => 2_000_000
       },
       parallel: 2
     )
+
+    nil
   end
 
   def bench() do
@@ -107,13 +111,12 @@ defmodule FibRustElixir do
       },
       inputs: %{
         "1" => 1,
-        "75" => 75,
+        "71" => 71,
         "100" => 100
       },
-      after_each: fn result ->
-        result in [1, 2_111_485_077_978_050, 354_224_848_179_261_915_075]
-      end,
       parallel: 2
     )
+
+    nil
   end
 end

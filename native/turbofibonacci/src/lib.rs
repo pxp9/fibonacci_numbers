@@ -21,7 +21,7 @@ fn fib(n: u128) -> u128 {
 }
 
 
-#[rustler::nif]
+#[rustler::nif(schedule = "DirtyCpu")]
 fn fib_bignums(n: u128) -> BigInt {
     let mut a = BigUint::zero();
     let mut b = BigUint::one();
