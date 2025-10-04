@@ -23,7 +23,7 @@ defmodule FibRustElixir do
 
   def dp_slow_fib(n) do
     if :ets.whereis(:fibs) == :undefined do
-      :ets.new(:fibs, [:named_table, read_concurrency: true])
+      :ets.new(:fibs, [:named_table, :public])
     end
 
     do_dp_slow_fib(n)
@@ -82,7 +82,7 @@ defmodule FibRustElixir do
 
   defp golden_ratio(n, a, b), do: golden_ratio(n - 1, b, a + b)
 
-  def bench_large_shit() do
+  def bench_large_numbers() do
     Benchee.run(
       %{
         "Elixir O(N) Algorithm" => &fib/1,
@@ -104,6 +104,7 @@ defmodule FibRustElixir do
     Benchee.run(
       %{
         "Elixir O(N) Algorithm" => &fib/1,
+        "Elixir O(2^n) Algorithm Memo" => &dp_slow_fib/1,
         "Elixir O(1) Algorithm Phi formula" => &phi_formula/1,
         "Rust O(1) Algorithm Phi formula" => &TurboFibonacci.phi_formula/1,
         "Rust O(N) Algorithm" => &TurboFibonacci.fib/1,
@@ -114,7 +115,34 @@ defmodule FibRustElixir do
         "71" => 71,
         "100" => 100
       },
-      parallel: 2
+      parallel: 2,
+      after_scenario: fn _input ->
+        if :ets.whereis(:fibs) != :undefined do
+          :ets.delete(:fibs)
+        end
+      end
+    )
+
+    nil
+  end
+
+  def bench_memo() do
+    Benchee.run(
+      %{
+        "Elixir O(2^n) Algorithm" => &slow_fib/1,
+        "Elixir O(2^n) Algorithm Memo" => &dp_slow_fib/1
+      },
+      inputs: %{
+        "1" => 1,
+        "20" => 20,
+        "45" => 45
+      },
+      parallel: 2,
+      after_scenario: fn _input ->
+        if :ets.whereis(:fibs) != :undefined do
+          :ets.delete(:fibs)
+        end
+      end
     )
 
     nil
